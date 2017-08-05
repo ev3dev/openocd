@@ -10,7 +10,7 @@ See the AUTHORS file for the complete list of upstream authors.
 -------------------------------------------------------------------------------
 
 Files: *
-Copyright: © 2004-2014 Dominic Rath et al.
+Copyright: © 2004-2015 Dominic Rath et al.
 License: GPL-2+
 
 On Debian systems, the complete text of the GNU General
@@ -461,6 +461,48 @@ License:
 
 -------------------------------------------------------------------------------
 
+Files: contrib/loaders/*
+Copyright: © 2006 Dominic Rath <Dominic.Rath@gmx.de>
+           © 2014 Jeff Ciesielski
+           © 2010 Spencer Oliver <spen@spen-soft.co.uk>
+           © 2015 Tomas Vanek <vanekt@fbl.cz>
+License: GPL-2+
+
+-------------------------------------------------------------------------------
+
+Files: contrib/loaders/flash/*
+Copyright: © 2015-2016 Andreas Färber <afaerber@suse.de>
+           © 2011 Andreas Fritiofson <andreas.fritiofson@gmail.com>
+           © 2014 Angus Gratton <gus@projectgus.com>
+           © 2015 Bogdan Kolbov <kolbov@niiet.ru>
+           © 2011 Clement Burin des Roziers <clement.burin-des-roziers@hikob.com>
+           © 2005-2007 Dominic Rath <Dominic.Rath@gmx.de>
+           © 2012 George Harris <george@luminairecoffee.com>
+           © 2013 Henrik Nilsson <henrik.nilsson@bytequest.se>
+           © 2015 Ivan Meleca <vanekt@fbl.cz>
+           © 2014 by Ladislav Bábel <ladababel@seznam.cz>
+           © 2006 Magnus Lundin <lundin@mlu.mine.nu>
+           © 2014 Mahavir Jain <mjain@marvell.com>
+           © 2011 Øyvind Harboe <oyvind.harboe@zylin.com>
+           © 2013 Paul Fertser <fercerpav@gmail.com>
+           © 2007 Pavel Chromy <chromy@asix.cz>
+           © 2015 Robert Jordens <jordens@gmail.com>
+           © 2013 Roman Dmitrienko <me@iamroman.org>
+           © 2008-2010 Spencer Oliver <spen@spen-soft.co.uk>
+           © 2016 Tomas Vanek <vanekt@fbl.cz>
+           © 2015 Uwe Bonnes <bon@elektron.ikp.physik.tu-darmstadt.de>
+License: GPL-2+
+
+-------------------------------------------------------------------------------
+
+Files: contrib/loaders/flash/at91sam7x/at91sam7x_ram.ld
+       contrib/loaders/flash/at91sam7x/crt.s
+       contrib/loaders/flash/at91sam7x/samregs.h
+Copyright: © 2006 Michael Fischer <fischermi@t-online.de>
+License: BSD-3
+
+-------------------------------------------------------------------------------
+
 Files: contrib/libdcc/dcc_stdio.c
 Copyright: © 2008 Dominic Rath <Dominic.Rath@gmx.de>
            © 2008 Spencer Oliver <spen@spen-soft.co.uk>
@@ -560,6 +602,7 @@ License: other
 
 Files: debian/*
 Copyright: © 2007-2012 Uwe Hermann <uwe@debian.org>
+           © 2017 Stefano Rivera <stefanor@debian.org>
 License: PD
    The packaging done by Uwe Hermann <uwe@debian.org> is hereby
    released as public domain.
