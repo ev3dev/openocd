@@ -32,6 +32,7 @@ DEB_CONFIGURE_EXTRA_FLAGS := \
 	--enable-opendous \
 	--enable-remote-bitbang \
 	--enable-bcm2835gpio \
+	--enable-sysfsgpio \
 #	--enable-jlink \
 
 

@@ -4,6 +4,7 @@ openocd (0.10.0-1) UNRELEASED; urgency=medium
     * Includes jtagspi (Closes: #844748)
     * Fixes Intel flash with MIPS target (Closes: #849825)
   * Disable jlink pending libjaylink package
+  * Enable sysfsgpio driver (Closes: #859246)
 
  -- Jonathan McDowell <noodles@earth.li>  Fri, 11 Aug 2017 14:37:44 -0400
 
