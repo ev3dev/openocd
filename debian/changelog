@@ -5,6 +5,7 @@ openocd (0.10.0-1) UNRELEASED; urgency=medium
     * Fixes Intel flash with MIPS target (Closes: #849825)
   * Disable jlink pending libjaylink package
   * Enable sysfsgpio driver (Closes: #859246)
+  * Move to libftdi1-dev (Closes: #810387)
 
  -- Jonathan McDowell <noodles@earth.li>  Fri, 11 Aug 2017 14:37:44 -0400
 
