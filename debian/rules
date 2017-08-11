@@ -17,12 +17,12 @@ DEB_COMPRESS_EXCLUDE := .elf .bin
 DEB_CONFIGURE_EXTRA_FLAGS := \
 	--disable-werror \
 	--disable-internal-jimtcl \
+	--disable-internal-libjaylink \
 	\
 	--enable-dummy \
 	--enable-ep93xx \
 	--enable-at91rm9200 \
 	--enable-usbprog \
-	--enable-jlink \
 	--enable-vsllink \
 	--enable-rlink \
 	--enable-ulink \
@@ -32,6 +32,7 @@ DEB_CONFIGURE_EXTRA_FLAGS := \
 	--enable-opendous \
 	--enable-remote-bitbang \
 	--enable-bcm2835gpio \
+#	--enable-jlink \
 
 
 configure_flags_parport := \
