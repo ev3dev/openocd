@@ -1,5 +1,6 @@
 openocd (0.10.0-1) UNRELEASED; urgency=medium
 
+  [ Jonathan McDowell ]
   * New upstream release
     * Includes jtagspi (Closes: #844748)
     * Fixes Intel flash with MIPS target (Closes: #849825)
@@ -8,6 +9,9 @@ openocd (0.10.0-1) UNRELEASED; urgency=medium
   * Enable sysfsgpio driver (Closes: #859246)
   * Move to libftdi1-dev (Closes: #810387)
   * Remove duplicated autotools-dev build-dep (Closes: #853010)
+
+  [ Stefano Rivera ]
+  * Clean up copyright file and move to DEP-8
 
  -- Jonathan McDowell <noodles@earth.li>  Fri, 11 Aug 2017 14:37:44 -0400
 
