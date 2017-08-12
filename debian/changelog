@@ -9,6 +9,7 @@ openocd (0.10.0-1) UNRELEASED; urgency=medium
   * Enable sysfsgpio driver (Closes: #859246)
   * Move to libftdi1-dev (Closes: #810387)
   * Remove duplicated autotools-dev build-dep (Closes: #853010)
+  * Switch to libusb-1.0 on kFreeBSD (Closes: #820147)
 
   [ Stefano Rivera ]
   * Clean up copyright file and move to DEP-8
