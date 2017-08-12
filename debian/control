@@ -1,11 +1,11 @@
 Source: openocd
 Section: embedded
 Priority: extra
-Maintainer: Uwe Hermann <uwe@debian.org>
-Uploaders: Luca Bruno <lucab@debian.org>
+Maintainer: Debian Electronics Packaging Team <pkg-electronics-devel@lists.alioth.debian.org>
+Uploaders: Jonathan McDowell <noodles@earth.li>
 Build-Depends: cdbs, debhelper (>= 7), libftdi1-dev,
                libusb-1.0-0-dev,
-               texinfo, texlive, 
+               texinfo, texlive,
                autotools-dev, autoconf,
                libhidapi-dev,
                libjim-dev,
@@ -13,8 +13,8 @@ Build-Depends: cdbs, debhelper (>= 7), libftdi1-dev,
                dh-autoreconf
 Standards-Version: 3.9.6
 Homepage: http://openocd.sourceforge.net/
-Vcs-Browser: http://anonscm.debian.org/cgit/crosstoolchain/openocd.git
-Vcs-Git: git://anonscm.debian.org/crosstoolchain/openocd.git
+Vcs-Browser: https://anonscm.debian.org/cgit/pkg-electronics/openocd.git
+Vcs-Git: git://anonscm.debian.org/pkg-electronics/openocd.git
 
 Package: openocd
 Architecture: any

@@ -11,6 +11,7 @@ openocd (0.10.0-1) UNRELEASED; urgency=medium
   * Move to libftdi1-dev (Closes: #810387)
   * Remove duplicated autotools-dev build-dep (Closes: #853010)
   * Switch to libusb-1.0 on kFreeBSD (Closes: #820147)
+  * Move maintenance to Debian Electronics Packaging Team
 
   [ Stefano Rivera ]
   * Clean up copyright file and move to DEP-8
