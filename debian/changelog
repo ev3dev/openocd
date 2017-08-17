@@ -12,6 +12,7 @@ openocd (0.10.0-1) UNRELEASED; urgency=medium
   * Remove duplicated autotools-dev build-dep (Closes: #853010)
   * Switch to libusb-1.0 on kFreeBSD (Closes: #820147)
   * Move maintenance to Debian Electronics Packaging Team
+  * Add patch enabling SWD support for Bus Pirate (Closes: #795550)
 
   [ Stefano Rivera ]
   * Clean up copyright file and move to DEP-8
