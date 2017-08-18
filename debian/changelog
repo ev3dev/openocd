@@ -15,6 +15,7 @@ openocd (0.10.0-1) UNRELEASED; urgency=medium
   * Add patch enabling SWD support for Bus Pirate (Closes: #795550)
   * Add explicit build-dep on libusb-0.1, which is still required for 3
     programmers supported by OpenOCD.
+  * Bump debhelper compat level to 10.
 
   [ Stefano Rivera ]
   * Clean up copyright file and move to DEP-8
