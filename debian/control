@@ -1,6 +1,6 @@
 Source: openocd
 Section: embedded
-Priority: extra
+Priority: optional
 Maintainer: Debian Electronics Packaging Team <pkg-electronics-devel@lists.alioth.debian.org>
 Uploaders: Jonathan McDowell <noodles@earth.li>
 Build-Depends: cdbs, debhelper (>= 10), libftdi1-dev,
@@ -11,7 +11,7 @@ Build-Depends: cdbs, debhelper (>= 10), libftdi1-dev,
                libjim-dev,
                pkg-config,
                dh-autoreconf
-Standards-Version: 4.0.0
+Standards-Version: 4.0.1
 Homepage: http://openocd.sourceforge.net/
 Vcs-Browser: https://anonscm.debian.org/cgit/pkg-electronics/openocd.git
 Vcs-Git: git://anonscm.debian.org/pkg-electronics/openocd.git
