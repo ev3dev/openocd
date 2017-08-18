@@ -9,10 +9,6 @@ include /usr/share/cdbs/1/rules/autoreconf.mk
 # Also build PDF and HTML documentation.
 DEB_MAKE_BUILD_TARGET := all pdf html
 
-# Don't strip/compress certain files.
-DEB_STRIP_EXCLUDE := .elf .bin
-DEB_COMPRESS_EXCLUDE := .elf .bin
-
 # TODO: Use --enable-oocd_trace later, right now it's just a proof-of-concept.
 DEB_CONFIGURE_EXTRA_FLAGS := \
 	--disable-werror \

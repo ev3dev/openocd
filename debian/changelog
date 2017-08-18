@@ -16,6 +16,7 @@ openocd (0.10.0-1) UNRELEASED; urgency=medium
   * Add explicit build-dep on libusb-0.1, which is still required for 3
     programmers supported by OpenOCD.
   * Bump debhelper compat level to 10.
+  * Drop unused + deprecated DEB_STRIP_EXCLUDE / DEB_COMPRESS_EXCLUDE options.
 
   [ Stefano Rivera ]
   * Clean up copyright file and move to DEP-8
