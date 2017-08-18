@@ -13,6 +13,8 @@ openocd (0.10.0-1) UNRELEASED; urgency=medium
   * Switch to libusb-1.0 on kFreeBSD (Closes: #820147)
   * Move maintenance to Debian Electronics Packaging Team
   * Add patch enabling SWD support for Bus Pirate (Closes: #795550)
+  * Add explicit build-dep on libusb-0.1, which is still required for 3
+    programmers supported by OpenOCD.
 
   [ Stefano Rivera ]
   * Clean up copyright file and move to DEP-8
