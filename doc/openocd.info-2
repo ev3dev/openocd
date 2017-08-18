@@ -1,8 +1,8 @@
-This is openocd.info, produced by makeinfo version 5.2 from
+This is openocd.info, produced by makeinfo version 6.3 from
 openocd.texi.
 
-This User's Guide documents release 0.9.0, dated 18 May 2015, of the
-Open On-Chip Debugger (OpenOCD).
+This User's Guide documents release 0.10.0, dated 15 January 2017, of
+the Open On-Chip Debugger (OpenOCD).
 
    * Copyright (C) 2008 The OpenOCD Project
    * Copyright (C) 2007-2008 Spencer Oliver <spen@spen-soft.co.uk>
@@ -538,7 +538,10 @@ Handling of this packet within GDB can be done :
 
 OpenOCD includes RTOS support, this will however need enabling as it
 defaults to disabled.  It can be enabled by passing '-rtos' arg to the
-target *Note RTOS Type: rtostype.
+target.  *Note RTOS Type: rtostype.
+
+*Note Debugging Programs with Multiple Threads: (gdb)Threads, for
+details about relevant GDB commands.
 
 
 An example setup is below:
@@ -555,6 +558,7 @@ Currently supported rtos's include:
    * 'ChibiOS'
    * 'embKernel'
    * 'mqx'
+   * 'uCOS-III'
 
      Note: Before an RTOS can be detected, it must export certain
      symbols; otherwise, it cannot be used by OpenOCD. Below is a list
@@ -566,9 +570,6 @@ Currently supported rtos's include:
      _tx_thread_current_ptr, _tx_thread_created_ptr,
      _tx_thread_created_count.
 'FreeRTOS symbols'
-     pxCurrentTCB, pxReadyTasksLists, xDelayedTaskList1,
-     xDelayedTaskList2, pxDelayedTaskList, pxOverflowDelayedTaskList,
-     xPendingReadyList, uxCurrentNumberOfTasks, uxTopUsedPriority.
 'linux symbols'
      init_task.
 'ChibiOS symbols'
@@ -579,15 +580,20 @@ Currently supported rtos's include:
      Rtos::sCurrentTaskCount.
 'mqx symbols'
      _mqx_kernel_data, MQX_init_struct.
+'uC/OS-III symbols'
+     OSRunning, OSTCBCurPtr, OSTaskDbgListPtr, OSTaskQty
 
 For most RTOS supported the above symbols will be exported by default.
-However for some, eg.  FreeRTOS, extra steps must be taken.
+However for some, eg.  FreeRTOS and uC/OS-III, extra steps must be
+taken.
 
 These RTOSes may require additional OpenOCD-specific file to be linked
 along with the project:
 
 'FreeRTOS'
      contrib/rtos-helpers/FreeRTOS-openocd.c
+'uC/OS-III'
+     contrib/rtos-helpers/uCOS-III-openocd.c
 
 
 File: openocd.info,  Node: Tcl Scripting API,  Next: FAQ,  Prev: GDB and OpenOCD,  Up: Top
@@ -720,6 +726,24 @@ type target_reset mode [reset-mode]
  -- Command: tcl_notifications [on/off]
      Toggle output of target notifications to the current Tcl RPC
      server.  Only available from the Tcl RPC server.  Defaults to off.
+
+22.6 Tcl RPC server trace output
+================================
+
+Trace data is sent asynchronously to other commands being executed over
+the RPC server, so the port must be polled continuously.
+
+Target trace data is emitted as a Tcl associative array in the following
+format.
+
+type target_trace data [trace-data-hex-encoded]
+
+ -- Command: tcl_trace [on/off]
+     Toggle output of target trace data to the current Tcl RPC server.
+     Only available from the Tcl RPC server.  Defaults to off.
+
+     See an example application here:
+     <https://github.com/apmorton/OpenOcdTraceUtil> [OpenOcdTraceUtil]
 
 
 File: openocd.info,  Node: FAQ,  Next: Tcl Crash Course,  Prev: Tcl Scripting API,  Up: Top
@@ -925,19 +949,7 @@ File: openocd.info,  Node: FAQ,  Next: Tcl Crash Course,  Prev: Tcl Scripting AP
 
      Laptops running on battery have this problem too...
 
-  10. USB Power When using the Amontec JTAGkey, sometimes OpenOCD
-     crashes with the following error messages: "Error: ft2232.c:201
-     ft2232_read(): FT_Read returned: 4" and "Error: ft2232.c:365
-     ft2232_send_and_recv(): couldn't read from FT2232".  What does that
-     mean and what might be the reason for this?
-
-     First of all, the reason might be the USB power supply.  Try using
-     a self-powered hub instead of a direct connection to your computer.
-     Secondly, the error code 4 corresponds to an FT_IO_ERROR, which
-     means that the driver for the FTDI USB chip ran into some sort of
-     error - this points us to a USB problem.
-
-  11. GDB Disconnects When using the Amontec JTAGkey, sometimes OpenOCD
+  10. GDB Disconnects When using the Amontec JTAGkey, sometimes OpenOCD
      crashes with the following error message: "Error: gdb_server.c:101
      gdb_get_char(): read: 10054".  What does that mean and what might
      be the reason for this?
@@ -946,7 +958,7 @@ File: openocd.info,  Node: FAQ,  Next: Tcl Crash Course,  Prev: Tcl Scripting AP
      debugger (GDB) has closed the connection to OpenOCD. This might be
      a GDB issue.
 
-  12. LPC2000 Flash In the configuration file in the section where flash
+  11. LPC2000 Flash In the configuration file in the section where flash
      device configurations are described, there is a parameter for
      specifying the clock frequency for LPC2000 internal flash devices
      (e.g.  'flash bank $_FLASHNAME lpc2000 0x0 0x40000 0 0 $_TARGETNAME
@@ -964,7 +976,7 @@ File: openocd.info,  Node: FAQ,  Next: Tcl Crash Course,  Prev: Tcl Scripting AP
      frequency and the actual clock frequency will not cause any
      trouble.
 
-  13. Command Order Do I have to keep a specific order for the commands
+  12. Command Order Do I have to keep a specific order for the commands
      in the configuration file?
 
      Well, yes and no.  Commands can be given in arbitrary order, yet
@@ -984,7 +996,7 @@ File: openocd.info,  Node: FAQ,  Next: Tcl Crash Course,  Prev: Tcl Scripting AP
      that needs to write to controller registers, perhaps for setting up
      DRAM and loading it with code.
 
-  14. JTAG TAP Order Do I have to declare the TAPS in some particular
+  13. JTAG TAP Order Do I have to declare the TAPS in some particular
      order?
 
      Yes; whenever you have more than one, you must declare them in the
@@ -1018,7 +1030,7 @@ File: openocd.info,  Node: FAQ,  Next: Tcl Crash Course,  Prev: Tcl Scripting AP
         * # Create the debug target and say where it is
         * target create stm32.cpu -chain-position stm32.cpu ...
 
-  15. SYSCOMP Sometimes my debugging session terminates with an error.
+  14. SYSCOMP Sometimes my debugging session terminates with an error.
      When I look into the log file, I can see these error messages:
      Error: arm7_9_common.c:561 arm7_9_execute_sys_speed(): timeout
      waiting for SYSCOMP
@@ -1802,8 +1814,10 @@ OpenOCD Concept Index
 
 * about:                                 About.              (line    6)
 * adaptive clocking:                     Debug Adapter Configuration.
-                                                             (line  741)
+                                                             (line  716)
 * adaptive clocking <1>:                 FAQ.                (line    6)
+* ambiqmicro:                            Flash Commands.     (line  382)
+* apollo:                                Flash Commands.     (line  382)
 * Architecture Specific Commands:        Architecture and Core Commands.
                                                              (line    6)
 * ARM:                                   Architecture and Core Commands.
@@ -1812,43 +1826,47 @@ OpenOCD Concept Index
                                                              (line  314)
 * ARM semihosting <1>:                   Architecture and Core Commands.
                                                              (line  285)
+* ARM semihosting <2>:                   Architecture and Core Commands.
+                                                             (line  296)
 * ARM11:                                 Architecture and Core Commands.
-                                                             (line  585)
+                                                             (line  594)
 * ARM7:                                  Architecture and Core Commands.
-                                                             (line  305)
+                                                             (line  314)
 * ARM720T:                               Architecture and Core Commands.
-                                                             (line  343)
+                                                             (line  352)
 * ARM9:                                  Architecture and Core Commands.
-                                                             (line  305)
+                                                             (line  314)
 * ARM9 <1>:                              Architecture and Core Commands.
-                                                             (line  359)
+                                                             (line  368)
 * ARM920T:                               Architecture and Core Commands.
-                                                             (line  379)
+                                                             (line  388)
 * ARM926ej-s:                            Architecture and Core Commands.
-                                                             (line  414)
+                                                             (line  423)
 * ARM966E:                               Architecture and Core Commands.
-                                                             (line  428)
+                                                             (line  437)
 * ARMv4:                                 Architecture and Core Commands.
-                                                             (line  298)
+                                                             (line  307)
 * ARMv5:                                 Architecture and Core Commands.
-                                                             (line  298)
+                                                             (line  307)
 * ARMv6:                                 Architecture and Core Commands.
-                                                             (line  581)
+                                                             (line  590)
 * ARMv7:                                 Architecture and Core Commands.
-                                                             (line  618)
-* at91sam3:                              Flash Commands.     (line  367)
-* at91sam4:                              Flash Commands.     (line  422)
-* at91sam4l:                             Flash Commands.     (line  427)
-* at91samd:                              Flash Commands.     (line  323)
+                                                             (line  627)
+* at91sam3:                              Flash Commands.     (line  473)
+* at91sam4:                              Flash Commands.     (line  528)
+* at91sam4l:                             Flash Commands.     (line  533)
+* at91samd:                              Flash Commands.     (line  420)
+* atsamv:                                Flash Commands.     (line  544)
 * autoprobe:                             TAP Declaration.    (line  309)
 * board config file:                     Config File Guidelines.
                                                              (line   60)
-* breakpoint:                            General Commands.   (line  313)
-* CFI:                                   Flash Commands.     (line  234)
+* breakpoint:                            General Commands.   (line  323)
+* bscan_spi:                             Flash Commands.     (line  287)
+* CFI:                                   Flash Commands.     (line  252)
 * command line options:                  Running.            (line    6)
 * commands:                              General Commands.   (line    6)
-* Common Flash Interface:                Flash Commands.     (line  234)
-* config command:                        Daemon Configuration.
+* Common Flash Interface:                Flash Commands.     (line  252)
+* config command:                        Server Configuration.
                                                              (line   13)
 * config file, board:                    Config File Guidelines.
                                                              (line   60)
@@ -1860,22 +1878,26 @@ OpenOCD Concept Index
                                                              (line  287)
 * config file, user:                     OpenOCD Project Setup.
                                                              (line  139)
-* configuration stage:                   Daemon Configuration.
+* configuration stage:                   Server Configuration.
                                                              (line   13)
 * Connecting to GDB:                     GDB and OpenOCD.    (line   27)
 * Core Specific Commands:                Architecture and Core Commands.
                                                              (line    6)
+* Cortex-A:                              Architecture and Core Commands.
+                                                             (line  671)
 * Cortex-M:                              Architecture and Core Commands.
-                                                             (line  727)
+                                                             (line  789)
+* Cortex-R:                              Architecture and Core Commands.
+                                                             (line  702)
 * CPU type:                              CPU Configuration.  (line   60)
 * DAP:                                   Architecture and Core Commands.
-                                                             (line  622)
+                                                             (line  631)
 * DCC:                                   Architecture and Core Commands.
-                                                             (line  321)
+                                                             (line  330)
 * DCC <1>:                               Architecture and Core Commands.
-                                                             (line  868)
+                                                             (line  930)
 * Debug Access Port:                     Architecture and Core Commands.
-                                                             (line  622)
+                                                             (line  631)
 * developers:                            Developers.         (line    6)
 * directory search:                      Running.            (line    6)
 * disassemble:                           Architecture and Core Commands.
@@ -1888,36 +1910,37 @@ OpenOCD Concept Index
 * ETM:                                   Architecture and Core Commands.
                                                              (line   14)
 * ETM <1>:                               Architecture and Core Commands.
-                                                             (line  653)
+                                                             (line  712)
 * event, reset-init:                     Config File Guidelines.
                                                              (line  176)
 * events:                                Reset Configuration.
                                                              (line  226)
 * events <1>:                            TAP Declaration.    (line  208)
-* events <2>:                            CPU Configuration.  (line  339)
+* events <2>:                            CPU Configuration.  (line  352)
 * faq:                                   FAQ.                (line    6)
 * Firmware recovery:                     Utility Commands.   (line   45)
 * flash configuration:                   Flash Commands.     (line   36)
 * flash erasing:                         Flash Commands.     (line   87)
 * flash programming:                     Flash Commands.     (line   87)
-* flash protection:                      Flash Commands.     (line  179)
+* flash protection:                      Flash Commands.     (line  189)
 * flash reading:                         Flash Commands.     (line   87)
 * flash writing:                         Flash Commands.     (line   87)
 * FPGA:                                  PLD/FPGA Commands.  (line    6)
 * FTDI:                                  Debug Adapter Hardware.
                                                              (line    6)
-* GDB:                                   Daemon Configuration.
-                                                             (line  131)
+* GDB:                                   Server Configuration.
+                                                             (line  137)
 * GDB <1>:                               GDB and OpenOCD.    (line    6)
-* GDB configuration:                     Daemon Configuration.
-                                                             (line  131)
-* GDB server:                            Daemon Configuration.
+* GDB configuration:                     Server Configuration.
+                                                             (line  137)
+* GDB server:                            Server Configuration.
                                                              (line   91)
 * GDB target:                            CPU Configuration.  (line    6)
-* halt:                                  General Commands.   (line   78)
-* image dumping:                         General Commands.   (line  264)
-* image loading:                         General Commands.   (line  264)
-* initialization:                        Daemon Configuration.
+* Generic JTAG2SPI driver:               Flash Commands.     (line  287)
+* halt:                                  General Commands.   (line   83)
+* image dumping:                         General Commands.   (line  269)
+* image loading:                         General Commands.   (line  269)
+* initialization:                        Server Configuration.
                                                              (line    6)
 * init_board procedure:                  Config File Guidelines.
                                                              (line  241)
@@ -1928,88 +1951,93 @@ OpenOCD Concept Index
 * interface config file:                 Debug Adapter Configuration.
                                                              (line    6)
 * ITM:                                   Architecture and Core Commands.
-                                                             (line  653)
+                                                             (line  712)
 * Jim-Tcl:                               About Jim-Tcl.      (line    6)
 * jrc:                                   TAP Declaration.    (line  246)
 * JTAG:                                  About.              (line   15)
 * JTAG <1>:                              Debug Adapter Configuration.
-                                                             (line  651)
+                                                             (line  626)
 * JTAG autoprobe:                        TAP Declaration.    (line  309)
 * JTAG Commands:                         JTAG Commands.      (line    6)
 * JTAG Route Controller:                 TAP Declaration.    (line  246)
+* jtagspi:                               Flash Commands.     (line  287)
+* kinetis:                               Flash Commands.     (line  635)
+* kinetis_ke:                            Flash Commands.     (line  710)
 * libdcc:                                Architecture and Core Commands.
-                                                             (line  868)
+                                                             (line  930)
 * Linux-ARM DCC support:                 Architecture and Core Commands.
-                                                             (line  868)
+                                                             (line  930)
 * logfile:                               Running.            (line    6)
-* lpcspifi:                              Flash Commands.     (line  265)
-* memory access:                         General Commands.   (line  231)
+* lpcspifi:                              Flash Commands.     (line  324)
+* memory access:                         General Commands.   (line  236)
 * message level:                         General Commands.   (line   55)
-* mFlash commands:                       Flash Commands.     (line 1376)
-* mFlash Configuration:                  Flash Commands.     (line 1360)
-* NAND:                                  Flash Commands.     (line  996)
-* NAND configuration:                    Flash Commands.     (line 1051)
-* NAND erasing:                          Flash Commands.     (line 1131)
-* NAND other commands:                   Flash Commands.     (line 1222)
-* NAND programming:                      Flash Commands.     (line 1131)
-* NAND programming <1>:                  Flash Commands.     (line 1144)
-* NAND programming <2>:                  Flash Commands.     (line 1197)
-* NAND reading:                          Flash Commands.     (line 1098)
-* NAND verification:                     Flash Commands.     (line 1197)
-* NAND writing:                          Flash Commands.     (line 1144)
-* NXP SPI Flash Interface:               Flash Commands.     (line  265)
-* object command:                        CPU Configuration.  (line  233)
+* mFlash commands:                       Flash Commands.     (line 1695)
+* mFlash Configuration:                  Flash Commands.     (line 1679)
+* NAND:                                  Flash Commands.     (line 1315)
+* NAND configuration:                    Flash Commands.     (line 1370)
+* NAND erasing:                          Flash Commands.     (line 1450)
+* NAND other commands:                   Flash Commands.     (line 1541)
+* NAND programming:                      Flash Commands.     (line 1450)
+* NAND programming <1>:                  Flash Commands.     (line 1463)
+* NAND programming <2>:                  Flash Commands.     (line 1516)
+* NAND reading:                          Flash Commands.     (line 1417)
+* NAND verification:                     Flash Commands.     (line 1516)
+* NAND writing:                          Flash Commands.     (line 1463)
+* NXP SPI Flash Interface:               Flash Commands.     (line  324)
+* object command:                        CPU Configuration.  (line  246)
 * PLD:                                   PLD/FPGA Commands.  (line    6)
-* port:                                  Daemon Configuration.
+* port:                                  Server Configuration.
                                                              (line   81)
 * printer port:                          Debug Adapter Hardware.
                                                              (line    6)
-* profiling:                             General Commands.   (line  345)
+* profiling:                             General Commands.   (line  355)
 * Programming using GDB:                 GDB and OpenOCD.    (line  126)
 * RAM testing:                           Utility Commands.   (line    9)
-* reset:                                 General Commands.   (line   78)
+* reset:                                 General Commands.   (line   83)
 * Reset Configuration:                   Reset Configuration.
                                                              (line    6)
 * reset-init handler:                    Config File Guidelines.
                                                              (line  176)
 * RPC:                                   Tcl Scripting API.  (line  100)
 * RPC Notifications:                     Tcl Scripting API.  (line  118)
+* RPC trace output:                      Tcl Scripting API.  (line  135)
 * RTCK:                                  Debug Adapter Hardware.
                                                              (line    6)
 * RTCK <1>:                              Debug Adapter Configuration.
-                                                             (line  741)
+                                                             (line  716)
 * RTCK <2>:                              FAQ.                (line    6)
 * RTOS Support:                          GDB and OpenOCD.    (line  204)
 * scan chain:                            TAP Declaration.    (line   28)
-* security:                              Daemon Configuration.
+* security:                              Server Configuration.
                                                              (line   81)
 * Serial Peripheral Interface:           Debug Adapter Configuration.
-                                                             (line  684)
+                                                             (line  659)
 * Serial Vector Format:                  Boundary Scan Commands.
                                                              (line   13)
 * Serial Wire Debug:                     Debug Adapter Configuration.
-                                                             (line  664)
-* server:                                Daemon Configuration.
+                                                             (line  639)
+* server:                                Server Configuration.
                                                              (line   81)
-* SMI:                                   Flash Commands.     (line  282)
+* SMI:                                   Flash Commands.     (line  341)
 * SMP:                                   Config File Guidelines.
                                                              (line  414)
 * SMP <1>:                               GDB and OpenOCD.    (line  164)
 * SPI:                                   Debug Adapter Configuration.
-                                                             (line  684)
-* SPIFI:                                 Flash Commands.     (line  265)
+                                                             (line  659)
+* SPI <1>:                               Flash Commands.     (line  287)
+* SPIFI:                                 Flash Commands.     (line  324)
 * STMicroelectronics Serial Memory Interface: Flash Commands.
-                                                             (line  282)
-* stmsmi:                                Flash Commands.     (line  282)
-* str9xpec:                              Flash Commands.     (line  835)
+                                                             (line  341)
+* stmsmi:                                Flash Commands.     (line  341)
+* str9xpec:                              Flash Commands.     (line 1198)
 * SVF:                                   Boundary Scan Commands.
                                                              (line   13)
 * SWD:                                   Debug Adapter Configuration.
-                                                             (line  664)
+                                                             (line  639)
 * SWO:                                   Architecture and Core Commands.
-                                                             (line  653)
+                                                             (line  712)
 * SWV:                                   Architecture and Core Commands.
-                                                             (line  653)
+                                                             (line  712)
 * TAP:                                   About.              (line   15)
 * TAP configuration:                     TAP Declaration.    (line    6)
 * TAP declaration:                       TAP Declaration.    (line    6)
@@ -2018,8 +2046,8 @@ OpenOCD Concept Index
 * TAP state names:                       JTAG Commands.      (line  142)
 * target config file:                    Config File Guidelines.
                                                              (line  287)
-* target events:                         CPU Configuration.  (line  339)
-* target initialization:                 General Commands.   (line   78)
+* target events:                         CPU Configuration.  (line  352)
+* target initialization:                 General Commands.   (line   83)
 * target type:                           CPU Configuration.  (line   60)
 * target, current:                       CPU Configuration.  (line   18)
 * target, list:                          CPU Configuration.  (line   18)
@@ -2027,21 +2055,21 @@ OpenOCD Concept Index
 * Tcl:                                   Tcl Crash Course.   (line    6)
 * Tcl Scripting API:                     Tcl Scripting API.  (line    6)
 * Tcl scripts:                           Tcl Scripting API.  (line    5)
-* TCP port:                              Daemon Configuration.
+* TCP port:                              Server Configuration.
                                                              (line   81)
 * TFTP:                                  TFTP.               (line    6)
 * TPIU:                                  Architecture and Core Commands.
-                                                             (line  653)
+                                                             (line  712)
 * tracing:                               Architecture and Core Commands.
                                                              (line   14)
 * tracing <1>:                           Architecture and Core Commands.
-                                                             (line  653)
+                                                             (line  712)
 * tracing <2>:                           Architecture and Core Commands.
-                                                             (line  868)
+                                                             (line  930)
 * translation:                           Config File Guidelines.
                                                              (line  600)
 * Transport:                             Debug Adapter Configuration.
-                                                             (line  625)
+                                                             (line  600)
 * USB Adapter:                           Debug Adapter Hardware.
                                                              (line    6)
 * user config file:                      OpenOCD Project Setup.
@@ -2052,22 +2080,22 @@ OpenOCD Concept Index
 * vector_catch:                          OpenOCD Project Setup.
                                                              (line  213)
 * vector_catch <1>:                      Architecture and Core Commands.
-                                                             (line  364)
+                                                             (line  373)
 * vector_catch <2>:                      Architecture and Core Commands.
-                                                             (line  554)
+                                                             (line  563)
 * vector_catch <3>:                      Architecture and Core Commands.
-                                                             (line  607)
+                                                             (line  616)
 * vector_catch <4>:                      Architecture and Core Commands.
-                                                             (line  746)
+                                                             (line  808)
 * vector_table:                          Architecture and Core Commands.
-                                                             (line  569)
-* watchpoint:                            General Commands.   (line  313)
+                                                             (line  578)
+* watchpoint:                            General Commands.   (line  323)
 * wiggler:                               Debug Adapter Hardware.
                                                              (line    6)
 * Xilinx Serial Vector Format:           Boundary Scan Commands.
                                                              (line   25)
 * XScale:                                Architecture and Core Commands.
-                                                             (line  442)
+                                                             (line  451)
 * XSVF:                                  Boundary Scan Commands.
                                                              (line   25)
 * zy1000:                                Debug Adapter Hardware.
@@ -2082,26 +2110,26 @@ Command and Driver Index
  [index ]
 * Menu:
 
-* $target_name arp_examine:              CPU Configuration.  (line  258)
-* $target_name arp_halt:                 CPU Configuration.  (line  259)
-* $target_name arp_poll:                 CPU Configuration.  (line  260)
-* $target_name arp_reset:                CPU Configuration.  (line  261)
-* $target_name arp_waitstate:            CPU Configuration.  (line  262)
-* $target_name array2mem:                CPU Configuration.  (line  267)
-* $target_name cget:                     CPU Configuration.  (line  285)
-* $target_name configure:                CPU Configuration.  (line  184)
-* $target_name curstate:                 CPU Configuration.  (line  308)
-* $target_name eventlist:                CPU Configuration.  (line  313)
-* $target_name invoke-event:             CPU Configuration.  (line  317)
-* $target_name mdb:                      CPU Configuration.  (line  324)
-* $target_name mdh:                      CPU Configuration.  (line  323)
-* $target_name mdw:                      CPU Configuration.  (line  322)
-* $target_name mem2array:                CPU Configuration.  (line  268)
-* $target_name mwb:                      CPU Configuration.  (line  332)
-* $target_name mwh:                      CPU Configuration.  (line  331)
-* $target_name mww:                      CPU Configuration.  (line  330)
+* $target_name arp_examine:              CPU Configuration.  (line  271)
+* $target_name arp_halt:                 CPU Configuration.  (line  272)
+* $target_name arp_poll:                 CPU Configuration.  (line  273)
+* $target_name arp_reset:                CPU Configuration.  (line  274)
+* $target_name arp_waitstate:            CPU Configuration.  (line  275)
+* $target_name array2mem:                CPU Configuration.  (line  280)
+* $target_name cget:                     CPU Configuration.  (line  298)
+* $target_name configure:                CPU Configuration.  (line  187)
+* $target_name curstate:                 CPU Configuration.  (line  321)
+* $target_name eventlist:                CPU Configuration.  (line  326)
+* $target_name invoke-event:             CPU Configuration.  (line  330)
+* $target_name mdb:                      CPU Configuration.  (line  337)
+* $target_name mdh:                      CPU Configuration.  (line  336)
+* $target_name mdw:                      CPU Configuration.  (line  335)
+* $target_name mem2array:                CPU Configuration.  (line  281)
+* $target_name mwb:                      CPU Configuration.  (line  345)
+* $target_name mwh:                      CPU Configuration.  (line  344)
+* $target_name mww:                      CPU Configuration.  (line  343)
 * adapter_khz:                           Debug Adapter Configuration.
-                                                             (line  724)
+                                                             (line  699)
 * adapter_name:                          Debug Adapter Configuration.
                                                              (line   54)
 * adapter_nsrst_assert_width:            Reset Configuration.
@@ -2109,12 +2137,16 @@ Command and Driver Index
 * adapter_nsrst_delay:                   Reset Configuration.
                                                              (line  126)
 * addreg:                                Architecture and Core Commands.
-                                                             (line  845)
+                                                             (line  907)
 * add_script_search_dir:                 General Commands.   (line   72)
-* aduc702x:                              Flash Commands.     (line  313)
+* aduc702x:                              Flash Commands.     (line  372)
+* ambiqmicro:                            Flash Commands.     (line  381)
+* ambiqmicro mass_erase:                 Flash Commands.     (line  409)
+* ambiqmicro page_erase:                 Flash Commands.     (line  411)
+* ambiqmicro program_otp:                Flash Commands.     (line  413)
 * amt_jtagaccel:                         Debug Adapter Configuration.
                                                              (line   63)
-* append_file:                           General Commands.   (line  192)
+* append_file:                           General Commands.   (line  197)
 * arm core_state:                        Architecture and Core Commands.
                                                              (line  248)
 * arm disassemble:                       Architecture and Core Commands.
@@ -2127,72 +2159,79 @@ Command and Driver Index
                                                              (line  280)
 * arm semihosting:                       Architecture and Core Commands.
                                                              (line  284)
+* arm semihosting_fileio:                Architecture and Core Commands.
+                                                             (line  295)
 * arm-jtag-ew:                           Debug Adapter Configuration.
                                                              (line   76)
 * arm11 memwrite burst:                  Architecture and Core Commands.
-                                                             (line  585)
+                                                             (line  594)
 * arm11 memwrite error_fatal:            Architecture and Core Commands.
-                                                             (line  595)
+                                                             (line  604)
 * arm11 step_irq_enable:                 Architecture and Core Commands.
-                                                             (line  601)
+                                                             (line  610)
 * arm11 vcr:                             Architecture and Core Commands.
-                                                             (line  606)
+                                                             (line  615)
 * arm720t cp15:                          Architecture and Core Commands.
-                                                             (line  348)
+                                                             (line  357)
 * arm7_9 dbgrq:                          Architecture and Core Commands.
-                                                             (line  310)
+                                                             (line  319)
 * arm7_9 dcc_downloads:                  Architecture and Core Commands.
-                                                             (line  320)
+                                                             (line  329)
 * arm7_9 fast_memory_access:             Architecture and Core Commands.
-                                                             (line  331)
+                                                             (line  340)
 * arm9 vector_catch:                     Architecture and Core Commands.
-                                                             (line  363)
+                                                             (line  372)
 * arm920t cache_info:                    Architecture and Core Commands.
-                                                             (line  384)
+                                                             (line  393)
 * arm920t cp15:                          Architecture and Core Commands.
-                                                             (line  389)
+                                                             (line  398)
 * arm920t cp15i:                         Architecture and Core Commands.
-                                                             (line  395)
+                                                             (line  404)
 * arm920t read_cache:                    Architecture and Core Commands.
-                                                             (line  405)
+                                                             (line  414)
 * arm920t read_mmu:                      Architecture and Core Commands.
-                                                             (line  408)
+                                                             (line  417)
 * arm926ejs cache_info:                  Architecture and Core Commands.
-                                                             (line  422)
+                                                             (line  431)
 * arm966e cp15:                          Architecture and Core Commands.
-                                                             (line  432)
+                                                             (line  441)
 * armjtagew_info:                        Debug Adapter Configuration.
                                                              (line   80)
 * at91rm9200:                            Debug Adapter Configuration.
                                                              (line   83)
-* at91sam3:                              Flash Commands.     (line  366)
-* at91sam3 gpnvm:                        Flash Commands.     (line  398)
-* at91sam3 gpnvm clear:                  Flash Commands.     (line  399)
-* at91sam3 gpnvm set:                    Flash Commands.     (line  400)
-* at91sam3 gpnvm show:                   Flash Commands.     (line  401)
-* at91sam3 info:                         Flash Commands.     (line  407)
-* at91sam3 slowclk:                      Flash Commands.     (line  417)
-* at91sam4:                              Flash Commands.     (line  421)
-* at91sam4l:                             Flash Commands.     (line  426)
-* at91sam4l smap_reset_deassert:         Flash Commands.     (line  432)
-* at91sam7:                              Flash Commands.     (line  437)
-* at91sam7 gpnvm:                        Flash Commands.     (line  470)
-* at91sam9:                              Flash Commands.     (line 1263)
-* at91sam9 ale:                          Flash Commands.     (line 1277)
-* at91sam9 ce:                           Flash Commands.     (line 1288)
-* at91sam9 cle:                          Flash Commands.     (line 1274)
-* at91sam9 rdy_busy:                     Flash Commands.     (line 1283)
-* at91samd:                              Flash Commands.     (line  322)
-* at91samd bootloader:                   Flash Commands.     (line  354)
-* at91samd chip-erase:                   Flash Commands.     (line  324)
-* at91samd eeprom:                       Flash Commands.     (line  340)
-* at91samd set-security:                 Flash Commands.     (line  329)
-* avr:                                   Flash Commands.     (line  478)
+* at91sam3:                              Flash Commands.     (line  472)
+* at91sam3 gpnvm:                        Flash Commands.     (line  504)
+* at91sam3 gpnvm clear:                  Flash Commands.     (line  505)
+* at91sam3 gpnvm set:                    Flash Commands.     (line  506)
+* at91sam3 gpnvm show:                   Flash Commands.     (line  507)
+* at91sam3 info:                         Flash Commands.     (line  513)
+* at91sam3 slowclk:                      Flash Commands.     (line  523)
+* at91sam4:                              Flash Commands.     (line  527)
+* at91sam4l:                             Flash Commands.     (line  532)
+* at91sam4l smap_reset_deassert:         Flash Commands.     (line  538)
+* at91sam7:                              Flash Commands.     (line  548)
+* at91sam7 gpnvm:                        Flash Commands.     (line  581)
+* at91sam9:                              Flash Commands.     (line 1582)
+* at91sam9 ale:                          Flash Commands.     (line 1596)
+* at91sam9 ce:                           Flash Commands.     (line 1607)
+* at91sam9 cle:                          Flash Commands.     (line 1593)
+* at91sam9 rdy_busy:                     Flash Commands.     (line 1602)
+* at91samd:                              Flash Commands.     (line  419)
+* at91samd bootloader:                   Flash Commands.     (line  455)
+* at91samd chip-erase:                   Flash Commands.     (line  425)
+* at91samd dsu_reset_deassert:           Flash Commands.     (line  467)
+* at91samd eeprom:                       Flash Commands.     (line  441)
+* at91samd set-security:                 Flash Commands.     (line  430)
+* atsamv:                                Flash Commands.     (line  543)
+* avr:                                   Flash Commands.     (line  589)
 * bcm2835gpio:                           Debug Adapter Configuration.
-                                                             (line  608)
-* bp:                                    General Commands.   (line  317)
-* cat:                                   General Commands.   (line  197)
-* cfi:                                   Flash Commands.     (line  233)
+                                                             (line  565)
+* bindto:                                General Commands.   (line   75)
+* bp:                                    General Commands.   (line  327)
+* cache_config l2x:                      Architecture and Core Commands.
+                                                             (line  696)
+* cat:                                   General Commands.   (line  202)
+* cfi:                                   Flash Commands.     (line  251)
 * cmsis-dap:                             Debug Adapter Configuration.
                                                              (line   87)
 * cmsis-dap info:                        Debug Adapter Configuration.
@@ -2201,37 +2240,59 @@ Command and Driver Index
                                                              (line   97)
 * cmsis_dap_vid_pid:                     Debug Adapter Configuration.
                                                              (line   90)
+* cortex_a cache_info:                   Architecture and Core Commands.
+                                                             (line  671)
+* cortex_a dacrfixup [on|off]:           Architecture and Core Commands.
+                                                             (line  674)
+* cortex_a dbginit:                      Architecture and Core Commands.
+                                                             (line  680)
+* cortex_a maskisr:                      Architecture and Core Commands.
+                                                             (line  693)
+* cortex_a smp_gdb:                      Architecture and Core Commands.
+                                                             (line  690)
+* cortex_a smp_off:                      Architecture and Core Commands.
+                                                             (line  684)
+* cortex_a smp_on:                       Architecture and Core Commands.
+                                                             (line  687)
 * cortex_m maskisr:                      Architecture and Core Commands.
-                                                             (line  727)
+                                                             (line  789)
 * cortex_m reset_config:                 Architecture and Core Commands.
-                                                             (line  761)
+                                                             (line  823)
 * cortex_m vector_catch:                 Architecture and Core Commands.
-                                                             (line  745)
-* cp:                                    General Commands.   (line  200)
+                                                             (line  807)
+* cortex_r dbginit:                      Architecture and Core Commands.
+                                                             (line  702)
+* cortex_r maskisr:                      Architecture and Core Commands.
+                                                             (line  706)
+* cp:                                    General Commands.   (line  205)
 * dap apcsw:                             Architecture and Core Commands.
-                                                             (line  646)
+                                                             (line  660)
 * dap apid:                              Architecture and Core Commands.
-                                                             (line  626)
+                                                             (line  635)
+* dap apreg:                             Architecture and Core Commands.
+                                                             (line  639)
 * dap apsel:                             Architecture and Core Commands.
-                                                             (line  630)
+                                                             (line  644)
 * dap baseaddr:                          Architecture and Core Commands.
-                                                             (line  633)
+                                                             (line  647)
 * dap info:                              Architecture and Core Commands.
-                                                             (line  637)
+                                                             (line  651)
 * dap memaccess:                         Architecture and Core Commands.
-                                                             (line  641)
-* davinci:                               Flash Commands.     (line 1294)
+                                                             (line  655)
+* dap ti_be_32_quirks:                   Architecture and Core Commands.
+                                                             (line  664)
+* davinci:                               Flash Commands.     (line 1613)
 * debug_level:                           General Commands.   (line   54)
 * drscan:                                JTAG Commands.      (line   42)
 * dummy:                                 Debug Adapter Configuration.
                                                              (line  105)
 * dummy <1>:                             Architecture and Core Commands.
                                                              (line  190)
-* dump_image:                            General Commands.   (line  264)
+* dump_image:                            General Commands.   (line  269)
 * du_select:                             Architecture and Core Commands.
-                                                             (line  832)
+                                                             (line  894)
 * echo:                                  General Commands.   (line   63)
-* efm32:                                 Flash Commands.     (line  482)
+* efm32:                                 Flash Commands.     (line  593)
 * ep93xx:                                Debug Adapter Configuration.
                                                              (line  108)
 * etb:                                   Architecture and Core Commands.
@@ -2265,86 +2326,81 @@ Command and Driver Index
 * etm_dummy config:                      Architecture and Core Commands.
                                                              (line  195)
 * exit:                                  General Commands.   (line   30)
-* fast_load:                             General Commands.   (line  268)
-* fast_load_image:                       General Commands.   (line  272)
+* fast_load:                             General Commands.   (line  273)
+* fast_load_image:                       General Commands.   (line  277)
 * flash bank:                            Flash Commands.     (line   36)
 * flash banks:                           Flash Commands.     (line   67)
 * flash erase_address:                   Flash Commands.     (line  120)
-* flash erase_check:                     Flash Commands.     (line  179)
+* flash erase_check:                     Flash Commands.     (line  189)
 * flash erase_sector:                    Flash Commands.     (line  114)
 * flash fillb:                           Flash Commands.     (line  133)
 * flash fillh:                           Flash Commands.     (line  132)
 * flash fillw:                           Flash Commands.     (line  131)
-* flash info:                            Flash Commands.     (line  183)
+* flash info:                            Flash Commands.     (line  193)
 * flash list:                            Flash Commands.     (line   72)
-* flash padded_value:                    Flash Commands.     (line  195)
+* flash padded_value:                    Flash Commands.     (line  211)
 * flash probe:                           Flash Commands.     (line   77)
-* flash protect:                         Flash Commands.     (line  188)
+* flash protect:                         Flash Commands.     (line  201)
+* flash read_bank:                       Flash Commands.     (line  148)
+* flash verify_bank:                     Flash Commands.     (line  153)
 * flash write_bank:                      Flash Commands.     (line  143)
-* flash write_image:                     Flash Commands.     (line  148)
+* flash write_image:                     Flash Commands.     (line  158)
 * flush_count:                           JTAG Commands.      (line   70)
-* fm3:                                   Flash Commands.     (line  930)
-* ft2232:                                Debug Adapter Configuration.
-                                                             (line  112)
-* ft2232_channel:                        Debug Adapter Configuration.
-                                                             (line  189)
-* ft2232_device_desc:                    Debug Adapter Configuration.
-                                                             (line  122)
-* ft2232_latency:                        Debug Adapter Configuration.
-                                                             (line  178)
-* ft2232_layout:                         Debug Adapter Configuration.
-                                                             (line  136)
-* ft2232_serial:                         Debug Adapter Configuration.
-                                                             (line  128)
-* ft2232_vid_pid:                        Debug Adapter Configuration.
-                                                             (line  172)
+* fm3:                                   Flash Commands.     (line  609)
+* fm4:                                   Flash Commands.     (line  618)
 * ftdi:                                  Debug Adapter Configuration.
-                                                             (line  201)
+                                                             (line  112)
 * ftdi_channel:                          Debug Adapter Configuration.
-                                                             (line  259)
+                                                             (line  183)
 * ftdi_device_desc:                      Debug Adapter Configuration.
-                                                             (line  246)
-* ftdi_layout_init:                      Debug Adapter Configuration.
-                                                             (line  264)
-* ftdi_layout_signal:                    Debug Adapter Configuration.
-                                                             (line  274)
-* ftdi_serial:                           Debug Adapter Configuration.
-                                                             (line  251)
-* ftdi_set_signal:                       Debug Adapter Configuration.
-                                                             (line  308)
-* ftdi_vid_pid:                          Debug Adapter Configuration.
+                                                             (line  159)
+* ftdi_get_signal:                       Debug Adapter Configuration.
                                                              (line  240)
-* gdb_breakpoint_override:               Daemon Configuration.
-                                                             (line  136)
-* gdb_flash_program:                     Daemon Configuration.
-                                                             (line  143)
-* gdb_memory_map:                        Daemon Configuration.
-                                                             (line  147)
-* gdb_port:                              Daemon Configuration.
+* ftdi_layout_init:                      Debug Adapter Configuration.
+                                                             (line  188)
+* ftdi_layout_signal:                    Debug Adapter Configuration.
+                                                             (line  198)
+* ftdi_location:                         Debug Adapter Configuration.
+                                                             (line  172)
+* ftdi_serial:                           Debug Adapter Configuration.
+                                                             (line  164)
+* ftdi_set_signal:                       Debug Adapter Configuration.
+                                                             (line  234)
+* ftdi_tdo_sample_edge:                  Debug Adapter Configuration.
+                                                             (line  243)
+* ftdi_vid_pid:                          Debug Adapter Configuration.
+                                                             (line  154)
+* gdb_breakpoint_override:               Server Configuration.
+                                                             (line  142)
+* gdb_flash_program:                     Server Configuration.
+                                                             (line  149)
+* gdb_memory_map:                        Server Configuration.
+                                                             (line  153)
+* gdb_port:                              Server Configuration.
                                                              (line   90)
-* gdb_report_data_abort:                 Daemon Configuration.
-                                                             (line  155)
-* gdb_save_tdesc:                        Daemon Configuration.
-                                                             (line  165)
-* gdb_target_description:                Daemon Configuration.
-                                                             (line  160)
+* gdb_report_data_abort:                 Server Configuration.
+                                                             (line  161)
+* gdb_save_tdesc:                        Server Configuration.
+                                                             (line  171)
+* gdb_target_description:                Server Configuration.
+                                                             (line  166)
 * gw16012:                               Debug Adapter Configuration.
-                                                             (line  388)
-* halt:                                  General Commands.   (line  118)
+                                                             (line  329)
+* halt:                                  General Commands.   (line  123)
 * help:                                  General Commands.   (line   33)
 * hla:                                   Debug Adapter Configuration.
-                                                             (line  566)
+                                                             (line  523)
 * hla_command:                           Debug Adapter Configuration.
-                                                             (line  589)
+                                                             (line  546)
 * hla_device_desc:                       Debug Adapter Configuration.
-                                                             (line  577)
+                                                             (line  534)
 * hla_layout:                            Debug Adapter Configuration.
-                                                             (line  583)
+                                                             (line  540)
 * hla_serial:                            Debug Adapter Configuration.
-                                                             (line  580)
+                                                             (line  537)
 * hla_vid_pid:                           Debug Adapter Configuration.
-                                                             (line  586)
-* init:                                  Daemon Configuration.
+                                                             (line  543)
+* init:                                  Server Configuration.
                                                              (line   47)
 * init_reset:                            Reset Configuration.
                                                              (line  257)
@@ -2354,38 +2410,42 @@ Command and Driver Index
                                                              (line   48)
 * interface_list:                        Debug Adapter Configuration.
                                                              (line   45)
-* ip:                                    General Commands.   (line  203)
+* ip:                                    General Commands.   (line  208)
 * irscan:                                JTAG Commands.      (line   81)
 * itm port:                              Architecture and Core Commands.
-                                                             (line  717)
+                                                             (line  779)
 * itm ports:                             Architecture and Core Commands.
-                                                             (line  721)
+                                                             (line  783)
 * jlink:                                 Debug Adapter Configuration.
-                                                             (line  398)
-* jlink caps:                            Debug Adapter Configuration.
-                                                             (line  415)
+                                                             (line  339)
 * jlink config:                          Debug Adapter Configuration.
-                                                             (line  423)
+                                                             (line  364)
 * jlink config ip:                       Debug Adapter Configuration.
-                                                             (line  431)
-* jlink config kickstart:                Debug Adapter Configuration.
-                                                             (line  425)
-* jlink config mac_address:              Debug Adapter Configuration.
-                                                             (line  428)
+                                                             (line  372)
+* jlink config mac:                      Debug Adapter Configuration.
+                                                             (line  369)
 * jlink config reset:                    Debug Adapter Configuration.
-                                                             (line  438)
-* jlink config save:                     Debug Adapter Configuration.
-                                                             (line  440)
-* jlink config usb_address:              Debug Adapter Configuration.
-                                                             (line  435)
-* jlink hw_jtag:                         Debug Adapter Configuration.
-                                                             (line  420)
-* jlink info:                            Debug Adapter Configuration.
-                                                             (line  417)
-* jlink pid:                             Debug Adapter Configuration.
-                                                             (line  443)
+                                                             (line  380)
+* jlink config targetpower:              Debug Adapter Configuration.
+                                                             (line  366)
+* jlink config usb:                      Debug Adapter Configuration.
+                                                             (line  376)
+* jlink config write:                    Debug Adapter Configuration.
+                                                             (line  382)
+* jlink emucom read <channel> <length>:  Debug Adapter Configuration.
+                                                             (line  392)
+* jlink emucom write <channel> <data>:   Debug Adapter Configuration.
+                                                             (line  385)
+* jlink freemem:                         Debug Adapter Configuration.
+                                                             (line  359)
+* jlink hwstatus:                        Debug Adapter Configuration.
+                                                             (line  356)
+* jlink jtag:                            Debug Adapter Configuration.
+                                                             (line  361)
 * jlink serial:                          Debug Adapter Configuration.
-                                                             (line  446)
+                                                             (line  408)
+* jlink usb:                             Debug Adapter Configuration.
+                                                             (line  400)
 * jtag arp_init:                         Reset Configuration.
                                                              (line  275)
 * jtag arp_init-reset:                   Reset Configuration.
@@ -2397,67 +2457,92 @@ Command and Driver Index
 * jtag tapdisable:                       TAP Declaration.    (line  289)
 * jtag tapenable:                        TAP Declaration.    (line  294)
 * jtag tapisenabled:                     TAP Declaration.    (line  299)
-* jtag_init:                             Daemon Configuration.
+* jtagspi:                               Flash Commands.     (line  286)
+* jtag_init:                             Server Configuration.
                                                              (line   65)
 * jtag_ntrst_assert_width:               Reset Configuration.
                                                              (line  133)
 * jtag_ntrst_delay:                      Reset Configuration.
                                                              (line  138)
 * jtag_rclk:                             Debug Adapter Configuration.
-                                                             (line  740)
+                                                             (line  715)
 * jtag_reset:                            JTAG Commands.      (line   98)
-* load_image:                            General Commands.   (line  283)
+* kinetis:                               Flash Commands.     (line  634)
+* kinetis disable_wdog:                  Flash Commands.     (line  705)
+* kinetis fcf_source:                    Flash Commands.     (line  643)
+* kinetis fopt:                          Flash Commands.     (line  655)
+* kinetis mdm check_security:            Flash Commands.     (line  659)
+* kinetis mdm halt:                      Flash Commands.     (line  663)
+* kinetis mdm mass_erase:                Flash Commands.     (line  668)
+* kinetis mdm reset:                     Flash Commands.     (line  700)
+* kinetis nvm_partition:                 Flash Commands.     (line  675)
+* kinetis_ke:                            Flash Commands.     (line  709)
+* kinetis_ke disable_wdog:               Flash Commands.     (line  727)
+* kinetis_ke mdm check_security:         Flash Commands.     (line  717)
+* kinetis_ke mdm mass_erase:             Flash Commands.     (line  721)
+* load_image:                            General Commands.   (line  288)
 * log_output:                            General Commands.   (line   68)
-* lpc2000:                               Flash Commands.     (line  491)
-* lpc2000 part_id:                       Flash Commands.     (line  529)
-* lpc288x:                               Flash Commands.     (line  533)
-* lpc2900:                               Flash Commands.     (line  541)
-* lpc2900 password:                      Flash Commands.     (line  597)
-* lpc2900 read_custom:                   Flash Commands.     (line  586)
-* lpc2900 secure_jtag:                   Flash Commands.     (line  632)
-* lpc2900 secure_sector:                 Flash Commands.     (line  618)
-* lpc2900 signature:                     Flash Commands.     (line  577)
-* lpc2900 write_custom:                  Flash Commands.     (line  607)
-* lpc3180:                               Flash Commands.     (line 1307)
-* lpc3180 select:                        Flash Commands.     (line 1310)
-* lpcspifi:                              Flash Commands.     (line  264)
-* ls:                                    General Commands.   (line  206)
-* mac:                                   General Commands.   (line  209)
-* mdb:                                   General Commands.   (line  243)
-* mdh:                                   General Commands.   (line  242)
-* mdr:                                   Flash Commands.     (line  972)
-* mdw:                                   General Commands.   (line  241)
-* meminfo:                               General Commands.   (line  212)
+* lpc2000:                               Flash Commands.     (line  730)
+* lpc2000 part_id:                       Flash Commands.     (line  768)
+* lpc288x:                               Flash Commands.     (line  772)
+* lpc2900:                               Flash Commands.     (line  780)
+* lpc2900 password:                      Flash Commands.     (line  836)
+* lpc2900 read_custom:                   Flash Commands.     (line  825)
+* lpc2900 secure_jtag:                   Flash Commands.     (line  871)
+* lpc2900 secure_sector:                 Flash Commands.     (line  857)
+* lpc2900 signature:                     Flash Commands.     (line  816)
+* lpc2900 write_custom:                  Flash Commands.     (line  846)
+* lpc3180:                               Flash Commands.     (line 1626)
+* lpc3180 select:                        Flash Commands.     (line 1629)
+* lpcspifi:                              Flash Commands.     (line  323)
+* ls:                                    General Commands.   (line  211)
+* mac:                                   General Commands.   (line  214)
+* mdb:                                   General Commands.   (line  248)
+* mdh:                                   General Commands.   (line  247)
+* mdr:                                   Flash Commands.     (line  878)
+* mdw:                                   General Commands.   (line  246)
+* meminfo:                               General Commands.   (line  217)
 * memTestAddressBus:                     Utility Commands.   (line   29)
 * memTestDataBus:                        Utility Commands.   (line   25)
 * memTestDevice:                         Utility Commands.   (line   34)
-* mflash bank:                           Flash Commands.     (line 1360)
-* mflash config boot:                    Flash Commands.     (line 1383)
-* mflash config pll:                     Flash Commands.     (line 1376)
-* mflash config storage:                 Flash Commands.     (line 1387)
-* mflash dump:                           Flash Commands.     (line 1391)
-* mflash probe:                          Flash Commands.     (line 1395)
-* mflash write:                          Flash Commands.     (line 1398)
-* mrvlqspi:                              Flash Commands.     (line  301)
-* mwb:                                   General Commands.   (line  254)
-* mwh:                                   General Commands.   (line  253)
-* mww:                                   General Commands.   (line  252)
-* mx3:                                   Flash Commands.     (line 1320)
-* mxc:                                   Flash Commands.     (line 1324)
-* mxc biswap:                            Flash Commands.     (line 1332)
-* nand check_bad_blocks:                 Flash Commands.     (line 1222)
-* nand device:                           Flash Commands.     (line 1054)
-* nand dump:                             Flash Commands.     (line 1097)
-* nand erase:                            Flash Commands.     (line 1130)
-* nand info:                             Flash Commands.     (line 1234)
-* nand list:                             Flash Commands.     (line 1077)
-* nand probe:                            Flash Commands.     (line 1087)
-* nand raw_access:                       Flash Commands.     (line 1239)
-* nand verify:                           Flash Commands.     (line 1196)
-* nand write:                            Flash Commands.     (line 1143)
-* nrf51:                                 Flash Commands.     (line  958)
-* nrf51 mass_erase:                      Flash Commands.     (line  966)
-* ocl:                                   Flash Commands.     (line  639)
+* mflash bank:                           Flash Commands.     (line 1679)
+* mflash config boot:                    Flash Commands.     (line 1702)
+* mflash config pll:                     Flash Commands.     (line 1695)
+* mflash config storage:                 Flash Commands.     (line 1706)
+* mflash dump:                           Flash Commands.     (line 1710)
+* mflash probe:                          Flash Commands.     (line 1714)
+* mflash write:                          Flash Commands.     (line 1717)
+* mrvlqspi:                              Flash Commands.     (line  360)
+* mwb:                                   General Commands.   (line  259)
+* mwh:                                   General Commands.   (line  258)
+* mww:                                   General Commands.   (line  257)
+* mx3:                                   Flash Commands.     (line 1639)
+* mxc:                                   Flash Commands.     (line 1643)
+* mxc biswap:                            Flash Commands.     (line 1651)
+* nand check_bad_blocks:                 Flash Commands.     (line 1541)
+* nand device:                           Flash Commands.     (line 1373)
+* nand dump:                             Flash Commands.     (line 1416)
+* nand erase:                            Flash Commands.     (line 1449)
+* nand info:                             Flash Commands.     (line 1553)
+* nand list:                             Flash Commands.     (line 1396)
+* nand probe:                            Flash Commands.     (line 1406)
+* nand raw_access:                       Flash Commands.     (line 1558)
+* nand verify:                           Flash Commands.     (line 1515)
+* nand write:                            Flash Commands.     (line 1462)
+* niietcm4:                              Flash Commands.     (line  899)
+* niietcm4 bflash_info_remap:            Flash Commands.     (line  939)
+* niietcm4 driver_info:                  Flash Commands.     (line  952)
+* niietcm4 extmem_cfg:                   Flash Commands.     (line  943)
+* niietcm4 service_mode_erase:           Flash Commands.     (line  948)
+* niietcm4 uflash_erase:                 Flash Commands.     (line  926)
+* niietcm4 uflash_full_erase:            Flash Commands.     (line  923)
+* niietcm4 uflash_protect:               Flash Commands.     (line  934)
+* niietcm4 uflash_protect_check:         Flash Commands.     (line  931)
+* niietcm4 uflash_read_byte:             Flash Commands.     (line  916)
+* niietcm4 uflash_write_byte:            Flash Commands.     (line  919)
+* nrf51:                                 Flash Commands.     (line  955)
+* nrf51 mass_erase:                      Flash Commands.     (line  963)
+* ocl:                                   Flash Commands.     (line  969)
 * oocd_trace:                            Architecture and Core Commands.
                                                              (line  222)
 * oocd_trace config:                     Architecture and Core Commands.
@@ -2467,215 +2552,229 @@ Command and Driver Index
 * oocd_trace status:                     Architecture and Core Commands.
                                                              (line  238)
 * opendous:                              Debug Adapter Configuration.
+                                                             (line  550)
+* openjtag:                              Debug Adapter Configuration.
+                                                             (line  579)
+* openjtag_device_desc:                  Debug Adapter Configuration.
                                                              (line  593)
-* orion:                                 Flash Commands.     (line 1336)
+* openjtag_variant:                      Debug Adapter Configuration.
+                                                             (line  583)
+* orion:                                 Flash Commands.     (line 1655)
 * parport:                               Debug Adapter Configuration.
-                                                             (line  458)
+                                                             (line  415)
 * parport_cable:                         Debug Adapter Configuration.
-                                                             (line  464)
+                                                             (line  421)
 * parport_port:                          Debug Adapter Configuration.
                                                              (line   68)
 * parport_port <1>:                      Debug Adapter Configuration.
-                                                             (line  392)
+                                                             (line  333)
 * parport_port <2>:                      Debug Adapter Configuration.
-                                                             (line  493)
+                                                             (line  450)
 * parport_toggling_time:                 Debug Adapter Configuration.
-                                                             (line  503)
+                                                             (line  460)
 * parport_write_on_exit:                 Debug Adapter Configuration.
-                                                             (line  537)
+                                                             (line  494)
 * pathmove:                              JTAG Commands.      (line  115)
-* peek:                                  General Commands.   (line  216)
-* pic32mx:                               Flash Commands.     (line  650)
-* pic32mx pgm_word:                      Flash Commands.     (line  658)
-* pic32mx unlock:                        Flash Commands.     (line  661)
+* peek:                                  General Commands.   (line  221)
+* pic32mx:                               Flash Commands.     (line  980)
+* pic32mx pgm_word:                      Flash Commands.     (line  988)
+* pic32mx unlock:                        Flash Commands.     (line  991)
 * pld device:                            PLD/FPGA Commands.  (line   23)
 * pld devices:                           PLD/FPGA Commands.  (line   28)
 * pld load:                              PLD/FPGA Commands.  (line   31)
-* poke:                                  General Commands.   (line  219)
-* poll:                                  Daemon Configuration.
-                                                             (line  205)
+* poke:                                  General Commands.   (line  224)
+* poll:                                  Server Configuration.
+                                                             (line  211)
 * power:                                 Debug Adapter Configuration.
-                                                             (line  605)
+                                                             (line  562)
 * presto:                                Debug Adapter Configuration.
-                                                             (line  549)
+                                                             (line  506)
 * presto_serial:                         Debug Adapter Configuration.
-                                                             (line  551)
-* profile:                               General Commands.   (line  345)
-* program:                               Flash Commands.     (line  201)
-* psoc4:                                 Flash Commands.     (line  665)
-* psoc4 flash_autoerase:                 Flash Commands.     (line  677)
-* psoc4 mass_erase:                      Flash Commands.     (line  690)
-* rbp:                                   General Commands.   (line  327)
+                                                             (line  508)
+* profile:                               General Commands.   (line  355)
+* program:                               Flash Commands.     (line  217)
+* psoc4:                                 Flash Commands.     (line  995)
+* psoc4 flash_autoerase:                 Flash Commands.     (line 1007)
+* psoc4 mass_erase:                      Flash Commands.     (line 1020)
+* rbp:                                   General Commands.   (line  337)
 * readgroup:                             Architecture and Core Commands.
-                                                             (line  858)
-* reg:                                   General Commands.   (line   84)
+                                                             (line  920)
+* reg:                                   General Commands.   (line   89)
 * remote_bitbang:                        Debug Adapter Configuration.
-                                                             (line  317)
+                                                             (line  259)
 * remote_bitbang_host:                   Debug Adapter Configuration.
-                                                             (line  329)
+                                                             (line  271)
 * remote_bitbang_port:                   Debug Adapter Configuration.
-                                                             (line  325)
-* reset:                                 General Commands.   (line  157)
-* reset halt:                            General Commands.   (line  159)
-* reset init:                            General Commands.   (line  160)
-* reset run:                             General Commands.   (line  158)
+                                                             (line  267)
+* reset:                                 General Commands.   (line  162)
+* reset halt:                            General Commands.   (line  164)
+* reset init:                            General Commands.   (line  165)
+* reset run:                             General Commands.   (line  163)
 * reset_config:                          Reset Configuration.
                                                              (line  143)
-* resume:                                General Commands.   (line  148)
+* resume:                                General Commands.   (line  153)
 * rlink:                                 Debug Adapter Configuration.
-                                                             (line  554)
-* rm:                                    General Commands.   (line  222)
+                                                             (line  511)
+* rm:                                    General Commands.   (line  227)
 * rtck:                                  Debug Adapter Configuration.
                                                              (line   72)
 * runAllMemTests:                        Utility Commands.   (line   39)
 * runtest:                               JTAG Commands.      (line  123)
-* rwp:                                   General Commands.   (line  330)
-* s3c2410:                               Flash Commands.     (line 1344)
-* s3c2412:                               Flash Commands.     (line 1345)
-* s3c2440:                               Flash Commands.     (line 1346)
-* s3c2443:                               Flash Commands.     (line 1347)
-* s3c6400:                               Flash Commands.     (line 1348)
+* rwp:                                   General Commands.   (line  340)
+* s3c2410:                               Flash Commands.     (line 1663)
+* s3c2412:                               Flash Commands.     (line 1664)
+* s3c2440:                               Flash Commands.     (line 1665)
+* s3c2443:                               Flash Commands.     (line 1666)
+* s3c6400:                               Flash Commands.     (line 1667)
 * scan_chain:                            TAP Declaration.    (line   89)
 * shutdown:                              General Commands.   (line   49)
-* sim3x:                                 Flash Commands.     (line  939)
-* sim3x lock:                            Flash Commands.     (line  955)
-* sim3x mass_erase:                      Flash Commands.     (line  950)
+* sim3x:                                 Flash Commands.     (line 1026)
+* sim3x lock:                            Flash Commands.     (line 1042)
+* sim3x mass_erase:                      Flash Commands.     (line 1037)
 * sleep:                                 General Commands.   (line   43)
-* soft_reset_halt:                       General Commands.   (line  175)
-* stellaris:                             Flash Commands.     (line  696)
-* stellaris recover:                     Flash Commands.     (line  705)
-* step:                                  General Commands.   (line  153)
-* stm32f1x:                              Flash Commands.     (line  718)
-* stm32f1x lock:                         Flash Commands.     (line  739)
-* stm32f1x options_read:                 Flash Commands.     (line  747)
-* stm32f1x options_write:                Flash Commands.     (line  752)
-* stm32f1x unlock:                       Flash Commands.     (line  743)
-* stm32f2x:                              Flash Commands.     (line  757)
-* stm32f2x lock:                         Flash Commands.     (line  772)
-* stm32f2x unlock:                       Flash Commands.     (line  776)
-* stm32lx:                               Flash Commands.     (line  780)
-* stm32lx mass_erase:                    Flash Commands.     (line  797)
-* stmsmi:                                Flash Commands.     (line  281)
-* str7x:                                 Flash Commands.     (line  803)
-* str7x disable_jtag:                    Flash Commands.     (line  812)
-* str9x:                                 Flash Commands.     (line  816)
-* str9x flash_config:                    Flash Commands.     (line  825)
-* str9xpec:                              Flash Commands.     (line  834)
-* str9xpec disable_turbo:                Flash Commands.     (line  877)
-* str9xpec enable_turbo:                 Flash Commands.     (line  880)
-* str9xpec lock:                         Flash Commands.     (line  884)
-* str9xpec options_cmap:                 Flash Commands.     (line  891)
-* str9xpec options_lvdsel:               Flash Commands.     (line  894)
-* str9xpec options_lvdthd:               Flash Commands.     (line  897)
-* str9xpec options_lvdwarn:              Flash Commands.     (line  900)
-* str9xpec options_read:                 Flash Commands.     (line  903)
-* str9xpec options_write:                Flash Commands.     (line  906)
-* str9xpec part_id:                      Flash Commands.     (line  888)
-* str9xpec unlock:                       Flash Commands.     (line  909)
+* soft_reset_halt:                       General Commands.   (line  180)
+* stellaris:                             Flash Commands.     (line 1045)
+* stellaris recover:                     Flash Commands.     (line 1054)
+* step:                                  General Commands.   (line  158)
+* stm32f1x:                              Flash Commands.     (line 1067)
+* stm32f1x lock:                         Flash Commands.     (line 1088)
+* stm32f1x options_read:                 Flash Commands.     (line 1096)
+* stm32f1x options_write:                Flash Commands.     (line 1101)
+* stm32f1x unlock:                       Flash Commands.     (line 1092)
+* stm32f2x:                              Flash Commands.     (line 1106)
+* stm32f2x lock:                         Flash Commands.     (line 1121)
+* stm32f2x options_read:                 Flash Commands.     (line 1129)
+* stm32f2x options_write:                Flash Commands.     (line 1134)
+* stm32f2x unlock:                       Flash Commands.     (line 1125)
+* stm32lx:                               Flash Commands.     (line 1143)
+* stm32lx mass_erase:                    Flash Commands.     (line 1160)
+* stmsmi:                                Flash Commands.     (line  340)
+* str7x:                                 Flash Commands.     (line 1166)
+* str7x disable_jtag:                    Flash Commands.     (line 1175)
+* str9x:                                 Flash Commands.     (line 1179)
+* str9x flash_config:                    Flash Commands.     (line 1188)
+* str9xpec:                              Flash Commands.     (line 1197)
+* str9xpec disable_turbo:                Flash Commands.     (line 1240)
+* str9xpec enable_turbo:                 Flash Commands.     (line 1243)
+* str9xpec lock:                         Flash Commands.     (line 1247)
+* str9xpec options_cmap:                 Flash Commands.     (line 1254)
+* str9xpec options_lvdsel:               Flash Commands.     (line 1257)
+* str9xpec options_lvdthd:               Flash Commands.     (line 1260)
+* str9xpec options_lvdwarn:              Flash Commands.     (line 1263)
+* str9xpec options_read:                 Flash Commands.     (line 1266)
+* str9xpec options_write:                Flash Commands.     (line 1269)
+* str9xpec part_id:                      Flash Commands.     (line 1251)
+* str9xpec unlock:                       Flash Commands.     (line 1272)
 * svf:                                   Boundary Scan Commands.
                                                              (line   17)
 * swd newdap:                            Debug Adapter Configuration.
-                                                             (line  674)
+                                                             (line  649)
 * swd wcr trn prescale:                  Debug Adapter Configuration.
-                                                             (line  677)
+                                                             (line  652)
 * tap_select:                            Architecture and Core Commands.
-                                                             (line  829)
-* target create:                         CPU Configuration.  (line  162)
+                                                             (line  891)
+* target create:                         CPU Configuration.  (line  165)
 * target current:                        CPU Configuration.  (line   37)
 * target names:                          CPU Configuration.  (line   40)
 * target types:                          CPU Configuration.  (line   71)
 * targets:                               CPU Configuration.  (line   46)
 * target_request debugmsgs:              Architecture and Core Commands.
-                                                             (line  907)
+                                                             (line  969)
 * tcl_notifications:                     Tcl Scripting API.  (line  128)
-* tcl_port:                              Daemon Configuration.
-                                                             (line  114)
-* telnet_port:                           Daemon Configuration.
-                                                             (line  121)
-* test_image:                            General Commands.   (line  298)
-* tms470:                                Flash Commands.     (line  912)
-* tms470 flash_keyset:                   Flash Commands.     (line  919)
-* tms470 osc_mhz:                        Flash Commands.     (line  923)
-* tms470 plldis:                         Flash Commands.     (line  926)
+* tcl_port:                              Server Configuration.
+                                                             (line  119)
+* tcl_trace:                             Tcl Scripting API.  (line  143)
+* telnet_port:                           Server Configuration.
+                                                             (line  127)
+* test_image:                            General Commands.   (line  303)
+* tms470:                                Flash Commands.     (line 1275)
+* tms470 flash_keyset:                   Flash Commands.     (line 1282)
+* tms470 osc_mhz:                        Flash Commands.     (line 1286)
+* tms470 plldis:                         Flash Commands.     (line 1289)
 * tpiu config:                           Architecture and Core Commands.
-                                                             (line  653)
+                                                             (line  712)
 * trace history:                         Architecture and Core Commands.
-                                                             (line  917)
+                                                             (line  979)
 * trace point:                           Architecture and Core Commands.
-                                                             (line  923)
+                                                             (line  985)
 * transport list:                        Debug Adapter Configuration.
-                                                             (line  628)
+                                                             (line  603)
 * transport select:                      Debug Adapter Configuration.
-                                                             (line  632)
-* trunc:                                 General Commands.   (line  225)
+                                                             (line  607)
+* trunc:                                 General Commands.   (line  230)
 * ulink:                                 Debug Adapter Configuration.
-                                                             (line  596)
+                                                             (line  553)
 * usbprog:                               Debug Adapter Configuration.
-                                                             (line  557)
+                                                             (line  514)
 * usb_blaster:                           Debug Adapter Configuration.
-                                                             (line  348)
+                                                             (line  290)
 * usb_blaster_device_desc:               Debug Adapter Configuration.
-                                                             (line  354)
+                                                             (line  296)
 * usb_blaster_firmware:                  Debug Adapter Configuration.
-                                                             (line  384)
+                                                             (line  325)
 * usb_blaster_lowlevel_driver:           Debug Adapter Configuration.
-                                                             (line  378)
+                                                             (line  320)
 * usb_blaster_pin:                       Debug Adapter Configuration.
-                                                             (line  368)
+                                                             (line  310)
 * usb_blaster_vid_pid:                   Debug Adapter Configuration.
-                                                             (line  360)
-* verify_image:                          General Commands.   (line  304)
+                                                             (line  302)
+* verify_image:                          General Commands.   (line  309)
+* verify_image_checksum:                 General Commands.   (line  315)
 * verify_ircapture:                      JTAG Commands.      (line  128)
 * verify_jtag:                           JTAG Commands.      (line  134)
-* version:                               General Commands.   (line  351)
-* virt2phys:                             General Commands.   (line  354)
+* version:                               General Commands.   (line  361)
+* virt2phys:                             General Commands.   (line  364)
 * virtex2:                               PLD/FPGA Commands.  (line   42)
-* virtex2 read_stat:                     PLD/FPGA Commands.  (line   48)
-* virtual:                               Flash Commands.     (line  213)
+* virtex2 read_stat:                     PLD/FPGA Commands.  (line   50)
+* virtual:                               Flash Commands.     (line  229)
 * vsllink:                               Debug Adapter Configuration.
-                                                             (line  560)
-* wait_halt:                             General Commands.   (line  119)
-* wp:                                    General Commands.   (line  333)
-* x86_32 idb:                            Architecture and Core Commands.
-                                                             (line  804)
-* x86_32 idh:                            Architecture and Core Commands.
-                                                             (line  800)
-* x86_32 idw:                            Architecture and Core Commands.
-                                                             (line  796)
-* x86_32 iwb:                            Architecture and Core Commands.
-                                                             (line  816)
-* x86_32 iwh:                            Architecture and Core Commands.
-                                                             (line  812)
-* x86_32 iww:                            Architecture and Core Commands.
-                                                             (line  808)
-* xscale analyze_trace:                  Architecture and Core Commands.
-                                                             (line  514)
-* xscale cache_clean_address:            Architecture and Core Commands.
                                                              (line  517)
-* xscale cache_info:                     Architecture and Core Commands.
-                                                             (line  520)
-* xscale cp15:                           Architecture and Core Commands.
+* wait_halt:                             General Commands.   (line  124)
+* wp:                                    General Commands.   (line  343)
+* x86_32 idb:                            Architecture and Core Commands.
+                                                             (line  866)
+* x86_32 idh:                            Architecture and Core Commands.
+                                                             (line  862)
+* x86_32 idw:                            Architecture and Core Commands.
+                                                             (line  858)
+* x86_32 iwb:                            Architecture and Core Commands.
+                                                             (line  878)
+* x86_32 iwh:                            Architecture and Core Commands.
+                                                             (line  874)
+* x86_32 iww:                            Architecture and Core Commands.
+                                                             (line  870)
+* xmc1xxx:                               Flash Commands.     (line 1293)
+* xmc4xxx:                               Flash Commands.     (line 1298)
+* xmc4xxx flash_password:                Flash Commands.     (line 1305)
+* xmc4xxx flash_unprotect:               Flash Commands.     (line 1309)
+* xscale analyze_trace:                  Architecture and Core Commands.
                                                              (line  523)
+* xscale cache_clean_address:            Architecture and Core Commands.
+                                                             (line  526)
+* xscale cache_info:                     Architecture and Core Commands.
+                                                             (line  529)
+* xscale cp15:                           Architecture and Core Commands.
+                                                             (line  532)
 * xscale dcache:                         Architecture and Core Commands.
-                                                             (line  530)
-* xscale debug_handler:                  Architecture and Core Commands.
-                                                             (line  527)
-* xscale dump_trace:                     Architecture and Core Commands.
-                                                             (line  533)
-* xscale icache:                         Architecture and Core Commands.
-                                                             (line  536)
-* xscale mmu:                            Architecture and Core Commands.
                                                              (line  539)
-* xscale trace_buffer:                   Architecture and Core Commands.
+* xscale debug_handler:                  Architecture and Core Commands.
+                                                             (line  536)
+* xscale dump_trace:                     Architecture and Core Commands.
                                                              (line  542)
+* xscale icache:                         Architecture and Core Commands.
+                                                             (line  545)
+* xscale mmu:                            Architecture and Core Commands.
+                                                             (line  548)
+* xscale trace_buffer:                   Architecture and Core Commands.
+                                                             (line  551)
 * xscale trace_image:                    Architecture and Core Commands.
-                                                             (line  547)
+                                                             (line  556)
 * xscale vector_catch:                   Architecture and Core Commands.
-                                                             (line  553)
+                                                             (line  562)
 * xscale vector_table:                   Architecture and Core Commands.
-                                                             (line  568)
+                                                             (line  577)
 * xsvf:                                  Boundary Scan Commands.
                                                              (line   32)
 * ZY1000:                                Debug Adapter Configuration.
-                                                             (line  599)
+                                                             (line  556)
 
