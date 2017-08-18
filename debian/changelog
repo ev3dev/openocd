@@ -17,6 +17,8 @@ openocd (0.10.0-1) UNRELEASED; urgency=medium
     programmers supported by OpenOCD.
   * Bump debhelper compat level to 10.
   * Drop unused + deprecated DEB_STRIP_EXCLUDE / DEB_COMPRESS_EXCLUDE options.
+  * Standards-Version: 4.0.0
+    * Support nodoc in DEB_BUILD_OPTIONS
 
   [ Stefano Rivera ]
   * Clean up copyright file and move to DEP-8
