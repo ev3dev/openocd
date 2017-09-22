@@ -32,7 +32,7 @@ DEB_CONFIGURE_EXTRA_FLAGS := \
 	--enable-remote-bitbang \
 	--enable-bcm2835gpio \
 	--enable-sysfsgpio \
-#	--enable-jlink \
+	--enable-jlink \
 
 
 configure_flags_parport := \

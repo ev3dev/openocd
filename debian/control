@@ -5,6 +5,7 @@ Maintainer: Debian Electronics Packaging Team <pkg-electronics-devel@lists.aliot
 Uploaders: Jonathan McDowell <noodles@earth.li>
 Build-Depends: cdbs, debhelper (>= 10), libftdi1-dev,
                libusb-1.0-0-dev, libusb-dev,
+               libjaylink-dev,
                texinfo, texlive,
                autotools-dev, autoconf,
                libhidapi-dev,
