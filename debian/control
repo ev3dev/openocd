@@ -3,15 +3,13 @@ Section: embedded
 Priority: optional
 Maintainer: Debian Electronics Packaging Team <pkg-electronics-devel@lists.alioth.debian.org>
 Uploaders: Jonathan McDowell <noodles@earth.li>
-Build-Depends: cdbs, debhelper (>= 10), libftdi1-dev,
+Build-Depends: debhelper (>= 10), libftdi1-dev,
                libusb-1.0-0-dev, libusb-dev,
                libjaylink-dev,
                texinfo, texlive,
-               autotools-dev, autoconf,
                libhidapi-dev,
                libjim-dev,
-               pkg-config,
-               dh-autoreconf
+               pkg-config
 Standards-Version: 4.0.1
 Homepage: http://openocd.sourceforge.net/
 Vcs-Browser: https://anonscm.debian.org/cgit/pkg-electronics/openocd.git

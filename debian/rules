@@ -1,19 +1,19 @@
 #!/usr/bin/make -f
 
-include /usr/share/cdbs/1/rules/debhelper.mk
-include /usr/share/cdbs/1/class/makefile.mk
-include /usr/share/cdbs/1/class/autotools.mk
-include /usr/share/cdbs/1/rules/utils.mk
-include /usr/share/cdbs/1/rules/autoreconf.mk
-
 DEB_MAKE_BUILD_TARGET := all
 # Also build PDF and HTML documentation if nodoc is not set
 ifeq (,$(filter nodoc,$(DEB_BUILD_OPTIONS)))
 	DEB_MAKE_BUILD_TARGET += pdf html
+	DEB_CONFIGURE_EXTRA_FLAGS := \
+		--enable-doxygen-pdf \
+		--enable-doxygen-html
+else
+	DEB_CONFIGURE_EXTRA_FLAGS := \
+		--disable-doxygen-pdf \
+		--disable-doxygen-html
 endif
 
-# TODO: Use --enable-oocd_trace later, right now it's just a proof-of-concept.
-DEB_CONFIGURE_EXTRA_FLAGS := \
+DEB_CONFIGURE_EXTRA_FLAGS += \
 	--disable-werror \
 	--disable-internal-jimtcl \
 	--disable-internal-libjaylink \
@@ -33,7 +33,6 @@ DEB_CONFIGURE_EXTRA_FLAGS := \
 	--enable-bcm2835gpio \
 	--enable-sysfsgpio \
 	--enable-jlink \
-
 
 configure_flags_parport := \
 	--enable-parport \
@@ -58,26 +57,11 @@ DEB_CONFIGURE_EXTRA_FLAGS += $(configure_flags_parport) \
 			     --enable-ti-icdi
 endif
 
-post-patches::
-	@# Copy udev rules file into debian/ so that dh_installudev finds it.
-	cp contrib/60-openocd.rules debian/openocd.udev
+override_dh_auto_build:
+	dh_auto_build -- $(DEB_MAKE_BUILD_TARGET)
 
-binary-install/openocd::
-	# Install the loaders/ subdir in /usr/share/doc.
-	cp -r contrib/loaders debian/openocd/usr/share/doc/openocd
+override_dh_auto_configure:
+	dh_auto_configure -- $(DEB_CONFIGURE_EXTRA_FLAGS)
 
-binary-post-install/openocd::
-	@# Don't ship openocd.udev in /usr/share, dh_installudev handles it.
-	rm -f debian/openocd/usr/share/openocd/contrib/60-openocd.rules
-	@# Drop /usr/share/info/dir, it's generated at runtime.
-	rm -f debian/openocd/usr/share/info/dir
-	@# Drop .la files
-	rm -f `find debian/openocd -name '*.la'`
-
-clean::
-	@# Clean copied udev file.
-	rm -f debian/openocd.udev
-
-# For /usr/share/cdbs/1/rules/utils.mk sanity check.
-common-binary-post-install-arch:: list-missing
-
+%:
+	dh $@

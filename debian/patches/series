@@ -1,2 +1,3 @@
 #Patch-file list
 buspirate-swd.patch
+no-duplicate-udev.patch
