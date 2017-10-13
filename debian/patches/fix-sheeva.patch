@@ -1,0 +1,18 @@
+Subject: Fix FTDI channel configuration for SheevaPlug
+Author: Jonathan McDowell <noodles@earth.li>
+Origin: upstream, https://sourceforge.net/p/openocd/code/ci/f95f8b70fbd0f7e9c91a2d9006b1abb2dd07ebf2/
+Bug-Debian: https://bugs.debian.org/837989
+Last-Update: 2017-10-13
+diff --git a/tcl/interface/ftdi/sheevaplug.cfg b/tcl/interface/ftdi/sheevaplug.cfg
+index f299f27a..625aad39 100644
+--- a/tcl/interface/ftdi/sheevaplug.cfg
++++ b/tcl/interface/ftdi/sheevaplug.cfg
+@@ -7,7 +7,7 @@
+ interface ftdi
+ ftdi_device_desc "SheevaPlug JTAGKey FT2232D B"
+ ftdi_vid_pid 0x9e88 0x9e8f
+-ftdi_channel 1
++ftdi_channel 0
+ 
+ ftdi_layout_init 0x0608 0x0f1b
+ ftdi_layout_signal nTRST -data 0x0200
