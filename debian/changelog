@@ -4,6 +4,7 @@ openocd (0.10.0-2) UNRELEASED; urgency=medium
   * Drop use of CDBS
     + Remove needless dep on autotools / dh-autoreconf.
   * Fix SheevaPlug configuration (Closes: #837989)
+  * Fix OpenRD configuration (Closes: #793214)
 
  -- Jonathan McDowell <noodles@earth.li>  Fri, 22 Sep 2017 10:52:20 +0100
 
