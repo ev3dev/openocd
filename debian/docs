@@ -8,6 +8,7 @@ contrib/loaders
 doc/manual/
 doc/openocd.pdf
 doc/openocd.html/
+debian/README.source
 
 # Note: Documentation files that are meant for Doxygen are not included here.
 
