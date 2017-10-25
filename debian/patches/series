@@ -3,3 +3,4 @@ buspirate-swd.patch
 no-duplicate-udev.patch
 fix-sheeva.patch
 fix-openrd.patch
+dexter-rpi.patch
