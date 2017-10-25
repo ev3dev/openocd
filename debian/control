@@ -1,8 +1,7 @@
 Source: openocd
 Section: embedded
 Priority: optional
-Maintainer: Debian Electronics Packaging Team <pkg-electronics-devel@lists.alioth.debian.org>
-Uploaders: Jonathan McDowell <noodles@earth.li>
+Maintainer: David Lechner <david@lechnology.com>
 Build-Depends: debhelper (>= 10), libftdi1-dev,
                libusb-1.0-0-dev, libusb-dev,
                libjaylink-dev,
@@ -10,10 +9,10 @@ Build-Depends: debhelper (>= 10), libftdi1-dev,
                libhidapi-dev,
                libjim-dev,
                pkg-config
-Standards-Version: 4.0.1
+Standards-Version: 3.9.8
 Homepage: http://openocd.sourceforge.net/
-Vcs-Browser: https://anonscm.debian.org/cgit/pkg-electronics/openocd.git
-Vcs-Git: git://anonscm.debian.org/pkg-electronics/openocd.git
+Vcs-Browser: https://github.com/ev3dev/openocd
+Vcs-Git: https://github.com/ev3dev/openocd.git
 
 Package: openocd
 Architecture: any
