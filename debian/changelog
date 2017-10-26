@@ -1,4 +1,4 @@
-openocd (0.10.0-2ev3dev1~1) UNRELEASED; urgency=medium
+openocd (0.10.0-2ev3dev1) testing; urgency=medium
 
   [ Jonathan McDowell ]
   * Re-enable jlink and add libjaylink-dev dependency.
@@ -10,8 +10,9 @@ openocd (0.10.0-2ev3dev1~1) UNRELEASED; urgency=medium
 
   [ David Lechner ]
   * ev3dev takeover
+  * Update rpi config to match Dexter Industries
 
- -- David Lechner <david@lechnology.com>  Wed, 25 Oct 2017 17:27:51 -0500
+ -- David Lechner <david@lechnology.com>  Wed, 25 Oct 2017 19:53:02 -0500
 
 openocd (0.10.0-1) unstable; urgency=medium
 
